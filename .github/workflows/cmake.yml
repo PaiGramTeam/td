@@ -1,0 +1,43 @@
+name: Manual CI Build
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Setup Git LFS
+      run: git lfs install
+
+    - name: Clone vcpkg
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git
+        cd vcpkg
+        git checkout cd5e746ec203c8c3c61647e0886a8df8c1e78e41
+        .\bootstrap-vcpkg.bat
+        .\vcpkg.exe install gperf:x86-windows openssl:x86-windows zlib:x86-windows
+        cd ..
+
+    - name: Build with CMake
+      run: |
+        Remove-Item build -Force -Recurse -ErrorAction SilentlyContinue
+        mkdir build
+        cd build
+        cmake -A Win32 -DCMAKE_INSTALL_PREFIX:PATH=../tdlib -DCMAKE_TOOLCHAIN_FILE:FILEPATH=../vcpkg/scripts/buildsystems/vcpkg.cmake ..
+        cmake --build . --target install --config Release
+        cd ..
+
+    - name: List Output
+      run: dir td/tdlib
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: compiled-files
+        path: |
+          td/tdlib/*
