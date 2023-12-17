@@ -42,4 +42,4 @@ jobs:
       with:
         name: compiled-files
         path: |
-          td/tdlib/*
+          td/build/*
