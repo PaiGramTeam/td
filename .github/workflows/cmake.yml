@@ -32,6 +32,11 @@ jobs:
         cmake --build . --target install --config Release
         cd ..
 
+    - name: List Output
+      run: |
+        cd ..
+        dir td/tdlib
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
